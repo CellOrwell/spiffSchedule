@@ -31,6 +31,38 @@ body {
     cursor: pointer;
 }
 
+#load_overlay {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.571);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+#load_overlay--load_icon {
+    position: relative;
+    color: white;
+    font-size: 120px;
+    animation-name: turn;
+    animation-duration: 2s;
+    animation-timing-function: 2s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes turn {
+    0% {transform: rotate(0deg);}
+    25% {transform: rotate(90deg);}
+    50% {transform: rotate(180deg);}
+    75% {transform: rotate(270deg);}
+    100% {transform: rotate(360deg);}
+}
+
 #schedule {
     position: relative;
     display: inline-block;
@@ -63,7 +95,7 @@ body {
     bottom: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 25%);
+    background-color: rgba(0, 0, 0, 0.25);
     padding: 3% 5%;
 }
 
@@ -108,6 +140,14 @@ body {
     width: 50%;
     margin: auto;
     border: 3px solid black;
+}
+
+#schedule_box--error_msg {
+    color: white;
+    padding-right: 110px;
+    padding-top: 600px;
+    text-align: center;
+    font-size: 100px;
 }
 
 .schedule_box hr:first-of-type {
