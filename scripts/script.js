@@ -7,7 +7,7 @@
 //     day: "numeric",
 // }
 
-const date = new Date();
+let date = new Date();
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -30,19 +30,12 @@ function getWeekStart(date) {
     return tempDate;
 }
 
-// function getWeekEnd(date) {
-//     const dateParts = date.split('/')
-//     const tempDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-//     tempDate.setUTCMilliseconds(tempDate.getUTCMilliseconds() + (86400000 * (7 - tempDate.getDay())))
-//     return tempDate;
-// }
-
 function getWeekEnd(date) {
     const tempDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     let dayShift = 0;
     if(tempDate.getDay() == 0)
     {
-        dayShift = 7;
+        dayShift = 0;
     }
     else
     {
@@ -56,8 +49,6 @@ function getWeekEnd(date) {
     tempDate.setMilliseconds(999);
     return tempDate;
 }
-
-console.log(getWeekEnd(date).toISOString());
 
 function getTwelveTime(date) {
     let hr = date.getHours() - 7;
@@ -154,49 +145,73 @@ function getSchedule() {
             return response.json();
         })
         .then((data) => {
-            console.log("GET Request Success!", data.data.segments);
-            sessionStorage.setItem('scheduleArray', JSON.stringify(data.data.segments));
+            const endOfWeek = getWeekEnd(date);
+            let schedArray = [];
+            // for(const scheduled in data.data.segments)
+            // {
+            //     if(Date.parse(scheduled.start_time) > endOfWeek.getUTCMilliseconds)
+            //     {
+            //         continue;
+            //     }
+            //     console.log(scheduled.title);
+            //     schedArray.push({'title': scheduled.title, 'start_time': scheduled.starts_time});
+            // }
+            for (let i = 0; i < data.data.segments.length; i++)
+            {
+                let scheduled = data.data.segments[i];
+                if(Date.parse(scheduled.start_time) <= endOfWeek.getTime())
+                {
+                    schedArray.push({'title': scheduled.title, 'start_time': scheduled.start_time, 'game': scheduled.category.name});
+                }
+            }
+            console.log("GET Request Success!", schedArray);
+            sessionStorage.setItem('scheduleArray', JSON.stringify(schedArray));
+            schedArray = [];
         })
         .catch((error) => {
-            console.error('Error making GET Request: ', error);
+            throw new Error('Error making GET Request: ', error);
         } )
 }
 
-getId("AstralSpiff");
-getSchedule();
-
-
 // General Stuff
 
-streamArray = JSON.parse(sessionStorage.getItem('scheduleArray'));
-
-var printHTML = "";
-var streamDate = null;
-
-for (const streamScheduled of streamArray) {
-    streamDate = new Date(streamScheduled.start_time);
-    // if(streamDate.getUTCMilliseconds > )
-    const streamName = sortStreamName(streamScheduled.title);
-    const streamDay = days[streamDate.getDay()];
-    const streamMonth = months[streamDate.getMonth()];
-    const streamDayNum = streamDate.getDate();
-    const streamTime = getTwelveTime(streamDate);
-    const textColor = getColor();
-    printHTML += `
-    <div class="schedule_box">
-        <p class="schedule_box--side_date">${streamMonth} ${streamDayNum}</p>
-        <div class="schedule_box--main_text">
-            <p class="schedule_box--date_time">${streamDay}: ${streamTime}</p>
-            <p class="schedule_box--stream_title" style="color:${textColor}">${streamName}</p>
-        </div>
-    </div>  `;
-}
-
-console.log(printHTML);
+const dateShow = document.getElementById("date_change--date");
+const dateLeftArrow = document.getElementById("date_change--left_arrow");
+const dateRightArrow = document.getElementById("date_change--right_arrow");
 
 const overlay = document.getElementsByClassName("overlay");
 
-overlay[0].innerHTML = printHTML;
+function setSchedule() {
+    overlay[0].innerHTML = "";
+    streamArray = JSON.parse(sessionStorage.getItem('scheduleArray'));
+    var printHTML = "";
+    var streamDate = null;
+    for (const streamScheduled of streamArray) {
+        streamDate = new Date(streamScheduled.start_time);
+        const streamName = sortStreamName(streamScheduled.title);
+        const gameName = streamScheduled.game;
+        const streamDay = days[streamDate.getDay()];
+        const streamMonth = months[streamDate.getMonth()];
+        const streamDayNum = streamDate.getDate();
+        const streamTime = getTwelveTime(streamDate);
+        const titleColor = getColor();
+        const gameColor = getColor();
+        printHTML += `
+        <div class="schedule_box">
+            <p class="schedule_box--side_date">${streamMonth} ${streamDayNum}</p>
+            <div class="schedule_box--main_text">
+                <p class="schedule_box--date_time">${streamDay}: ${streamTime}</p>
+                <hr />
+                <p class="schedule_box--stream_title" style="color:${titleColor}">${streamName}</p>
+                <hr />
+                <p class="schedule_box--game_name" style="color:${gameColor}">${gameName}</p>
+            </div>
+        </div>  `;
+    };
+    console.log(printHTML);
+
+    overlay[0].innerHTML = printHTML;
+};
 
 function getColor() {
     const rootStyle = getComputedStyle(document.documentElement);
@@ -208,9 +223,27 @@ function getColor() {
 }
 
 function sortStreamName(name) {
+    if(name == "")
+    {
+        return "No Title";
+    }
     const char = name.charAt(0).toUpperCase();
-
     return char + name.slice(1);
 }
 
-console.log(getColor());
+window.onload = function() {
+    console.log("Page Loaded Successfully");
+    dateShow.innerHTML = getWeekStart(date).toDateString();
+    getId("AstralSpiff");
+    getSchedule();
+    setSchedule();
+}
+
+dateLeftArrow.onclick = function() {
+    date.setTime(date.getTime() - (86400000*7));
+    dateShow.innerHTML = getWeekStart(date).toDateString();
+    console.log(date);
+    getSchedule();
+    setSchedule();
+}
+
