@@ -18,7 +18,20 @@ body {
     height: 100vh;
 }
 
-section {
+#date_change {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 80px;
+}
+
+#date_change i:hover {
+    cursor: pointer;
+}
+
+#schedule {
     position: relative;
     display: inline-block;
     word-wrap: break-word;
@@ -29,9 +42,11 @@ section {
     height: 70%;
     background-color: blue;
     -webkit-line-clamp: 2;
+    min-width: 917.45px;
+    min-height: 1900px;
 }
 
-section img {
+#schedule img {
     display: block;
     width: 100%;
     height: 100%;
@@ -39,7 +54,7 @@ section img {
     
 }
 
-section .overlay {
+#schedule .overlay {
     position: absolute;
     overflow: hidden;
     top: 0;
@@ -53,20 +68,21 @@ section .overlay {
 }
 
 .schedule_box {
-    -webkit-text-stroke: 2px black;
+    -webkit-text-stroke: 2.5px black;
     position: relative;
     top: 0;
-    height: 17%;
+    height: auto;
     width: 91%;
     margin-bottom: 4%;
     border-radius: 20px;
     background-color: rgba(235, 217, 217, 0.75);
     text-align: center;
-    font-size: 365%;
+    font-size: 70px;
     white-space: normal;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 .schedule_box--side_date {
@@ -74,7 +90,7 @@ section .overlay {
     font-weight: 400;
     top: 4%;
     left: 1%;
-    font-size: 40px;
+    font-size: 80%;
 }
 
 .schedule_box--main_text {
@@ -86,19 +102,32 @@ section .overlay {
 
 .schedule_box--date_time{
     color: #cccccc;
-    -webkit-text-stroke: 2px black;
+}
+
+.schedule_box hr {
+    width: 50%;
+    margin: auto;
+    border: 3px solid black;
+}
+
+.schedule_box hr:first-of-type {
+    margin-top: 10px;
+}
+
+.schedule_box hr:last-of-type {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .schedule_box--stream_title {
     margin-top: 15px;
     padding-bottom: 20px;
-    font-size: 70px;
+    font-size: 120%;
     line-height: 1;
-    -webkit-line-clamp: 2;
+}
 
-    /* @media not all and (display: -webkit-box) {
-        font-size: 10px;
-    } */
+.schedule_box--game_name {
+    font-size: 80%;
 }
 
 footer {
