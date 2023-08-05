@@ -3,21 +3,20 @@
     <head>
         <title>Unofficial AstralSpiff Schedule Creator</title>
         <link rel="stylesheet" href="../styles/style.css" />
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
     </head>
 
     <body>
 
-        <section>
+        <section id="date_change">
+            <i id="date_change--left_arrow" class='bx bx-chevron-left'></i>
+            <p id="date_change--date"></p>
+            <i id="date_change--left_arrow" class='bx bx-chevron-right'></i>
+        </section>
+
+        <section id="schedule">
             <img src="../img/spiffScheduleExample.png" />
             <div class="overlay">
-                <!-- <div class="schedule_box">
-                    <p class="schedule_box--side_date">Aug 1</p>
-                    <div class="schedule_box--main_text">
-                        <p class="schedule_box--date_time">Tuesday: 11am</p>
-                        <p class="schedule_box--stream_title">Speedruns on the way to sub 30</p>
-                    </div>
-                </div>
-                <div class="schedule-box"></div> -->
             </div>
 
             <footer>
