@@ -134,43 +134,44 @@ function getId(name) {
         })
 }
 
-function getSchedule() {
+async function getSchedule() {
     const url = mainUrl + "/schedule?broadcaster_id=" + sessionStorage.getItem('spiffId')+"&start_time="+getWeekStart(date).toISOString();
-    validateToken();
-    fetch(url, getOptions)
-        .then((response) => {
-            if(!response.ok) {
-                throw new Error(response.status + ' Error in HTTP Request');
-            }
-            return response.json();
-        })
-        .then((data) => {
-            const endOfWeek = getWeekEnd(date);
-            let schedArray = [];
-            // for(const scheduled in data.data.segments)
-            // {
-            //     if(Date.parse(scheduled.start_time) > endOfWeek.getUTCMilliseconds)
-            //     {
-            //         continue;
-            //     }
-            //     console.log(scheduled.title);
-            //     schedArray.push({'title': scheduled.title, 'start_time': scheduled.starts_time});
-            // }
-            for (let i = 0; i < data.data.segments.length; i++)
-            {
-                let scheduled = data.data.segments[i];
-                if(Date.parse(scheduled.start_time) <= endOfWeek.getTime())
-                {
-                    schedArray.push({'title': scheduled.title, 'start_time': scheduled.start_time, 'game': scheduled.category.name});
+    await validateToken();
+    await fetch(url, getOptions)
+            .then((response) => {
+                if(!response.ok) {
+                    throw new Error(response.status + ' Error in HTTP Request');
                 }
-            }
-            console.log("GET Request Success!", schedArray);
-            sessionStorage.setItem('scheduleArray', JSON.stringify(schedArray));
-            schedArray = [];
-        })
-        .catch((error) => {
-            throw new Error('Error making GET Request: ', error);
-        } )
+                return response.json();
+            })
+            .then((data) => {
+                const endOfWeek = getWeekEnd(date);
+                let schedArray = [];
+                // for(const scheduled in data.data.segments)
+                // {
+                //     if(Date.parse(scheduled.start_time) > endOfWeek.getUTCMilliseconds)
+                //     {
+                //         continue;
+                //     }
+                //     console.log(scheduled.title);
+                //     schedArray.push({'title': scheduled.title, 'start_time': scheduled.starts_time});
+                // }
+                for (let i = 0; i < data.data.segments.length; i++)
+                {
+                    let scheduled = data.data.segments[i];
+                    if(Date.parse(scheduled.start_time) <= endOfWeek.getTime())
+                    {
+                        schedArray.push({'title': scheduled.title, 'start_time': scheduled.start_time, 'game': scheduled.category.name});
+                    }
+                }
+                console.log("GET Request Success!", schedArray);
+                sessionStorage.setItem('scheduleArray', JSON.stringify(schedArray));
+                schedArray = [];
+            })
+            .catch((error) => {
+                console.log("I'm here!");
+                throw new Error('Error making GET Request: ');
+            } )
 }
 
 // General Stuff
@@ -178,14 +179,23 @@ function getSchedule() {
 const dateShow = document.getElementById("date_change--date");
 const dateLeftArrow = document.getElementById("date_change--left_arrow");
 const dateRightArrow = document.getElementById("date_change--right_arrow");
+const dateSkipToday = document.getElementById("date_change--skip_today");
 
 const overlay = document.getElementsByClassName("overlay");
+
 
 function setSchedule() {
     overlay[0].innerHTML = "";
     streamArray = JSON.parse(sessionStorage.getItem('scheduleArray'));
     var printHTML = "";
     var streamDate = null;
+
+    if(streamArray.length == 0)
+    {
+        noStreams();
+        return;
+    }
+
     for (const streamScheduled of streamArray) {
         streamDate = new Date(streamScheduled.start_time);
         const streamName = sortStreamName(streamScheduled.title);
@@ -231,19 +241,73 @@ function sortStreamName(name) {
     return char + name.slice(1);
 }
 
-window.onload = function() {
-    console.log("Page Loaded Successfully");
+window.onload = async function() {
+    setLoad();
     dateShow.innerHTML = getWeekStart(date).toDateString();
     getId("AstralSpiff");
-    getSchedule();
+    await getSchedule();
     setSchedule();
+    remLoad();
+    console.log("Page Loaded Successfully");
 }
 
-dateLeftArrow.onclick = function() {
+let contLoad = true;
+
+dateLeftArrow.onclick = async function() {
+    contLoad = true;
+    setLoad();
     date.setTime(date.getTime() - (86400000*7));
     dateShow.innerHTML = getWeekStart(date).toDateString();
     console.log(date);
-    getSchedule();
-    setSchedule();
+    await getSchedule().catch((error) => {
+        noStreams();
+        contLoad = false;
+    });
+    if(contLoad) {setSchedule();}
+    remLoad();
+}
+
+dateRightArrow.onclick = async function() {
+    contLoad = true;
+    setLoad();
+    date.setTime(date.getTime() + (86400000*7));
+    dateShow.innerHTML = getWeekStart(date).toDateString();
+    console.log(date);
+    await getSchedule().catch((error) => {
+        noStreams();
+        contLoad = false;
+    });
+    if(contLoad) {setSchedule();}
+    remLoad();
+}
+
+dateSkipToday.onclick = async function() {
+    contLoad = true;
+    setLoad();
+    date = new Date();
+    dateShow.innerHTML = getWeekStart(date).toDateString();
+    console.log(date);
+    await getSchedule().catch((error) => {
+        noStreams();
+        contLoad = false;
+    });
+    if(contLoad) {setSchedule();}
+    remLoad();
+}
+
+const loadOverlay = document.getElementById('load_overlay');
+
+function setLoad() {
+    loadOverlay.style.display = 'flex';
+}
+
+function remLoad() {
+    loadOverlay.style.display = 'none';
+}
+
+function noStreams() {
+    let printHTML = "<p id=\"schedule_box--error_msg\">Error Fetching Streams. The Schedule May Be Empty.</p>"
+    overlay[0].innerHTML = printHTML;
+    remLoad();
 }
 
